@@ -1,11 +1,12 @@
 
 import React from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, FlatList, useColorScheme } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, FlatList, useColorScheme } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types';
 import tw from '../lib/tailwind';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const filters = ['All', 'Paid', 'Pending', 'Overdue'];
 

@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, SafeAreaView, ScrollView, Modal, useColorScheme } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Modal, useColorScheme } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import CheckBox from '@react-native-community/checkbox';
 import { useNavigation } from '@react-navigation/native';
 import tw from '../lib/tailwind';

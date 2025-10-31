@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, useColorScheme } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, useColorScheme } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
 import tw from '../lib/tailwind';
