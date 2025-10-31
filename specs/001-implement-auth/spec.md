@@ -5,6 +5,16 @@
 **Status**: Draft  
 **Input**: User description: "Create an AuthContext using React Context API to manage global auth state. State should include: user (id, email, name, role, created_at), tokens (access_token, refresh_token, token_type), isAuthenticated boolean, login function, logout function, and loading boolean. Persist auth state using AsyncStorage. Create authApi.js with login and fetchUser functions. Update LoginScreen with form and authentication flow. Add user profile display to DashboardScreen. Create reusable UserProfileIcon component. Implement navigation protection. Add auth flow in App.js to check AsyncStorage on mount."
 
+## Clarifications
+
+### Session 2025-01-27
+
+- Q: When the access token expires during an active session, how should the system handle refresh? → A: No automatic refresh — redirect to login when token expires
+- Q: When the app restarts and finds stored tokens, how should it determine if they're still valid? → A: Assume tokens are valid — only check when API calls fail
+- Q: When login fails, should error messages differentiate failure types (e.g., invalid credentials vs network error vs server error)? → A: Show generic "Login failed" message for all failures
+- Q: When the app starts and attempts to restore a session from stored tokens, should a loading indicator be displayed? → A: Show loading indicator while checking tokens and fetching user info
+- Q: Should the login form validate input fields (e.g., require username and password) before allowing submission, or only validate on the backend? → A: No client-side validation — submit immediately, let backend validate
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - User Logs In Successfully (Priority: P1)
@@ -19,9 +29,9 @@ A clinic staff member opens the mobile app and needs to log in to access their d
 
 1. **Given** the user opens the app for the first time, **When** they enter valid credentials (username: admin@clinic.com, password: admin123) and tap "Log In", **Then** the system displays a loading indicator, authenticates the user, stores their session, and navigates to the dashboard screen
 
-2. **Given** the user is on the login screen, **When** they enter invalid credentials and tap "Log In", **Then** the system displays an error message explaining the authentication failed and keeps them on the login screen
+2. **Given** the user is on the login screen, **When** they enter invalid credentials and tap "Log In", **Then** the system displays a generic "Login failed" error message and keeps them on the login screen
 
-3. **Given** the user enters credentials, **When** the network request fails due to connectivity issues, **Then** the system displays an appropriate error message and does not navigate away from the login screen
+3. **Given** the user enters credentials, **When** the network request fails due to connectivity issues or any other error, **Then** the system displays a generic "Login failed" error message and does not navigate away from the login screen
 
 ---
 
@@ -53,11 +63,13 @@ A clinic staff member closes the app during their work shift and later reopens i
 
 **Acceptance Scenarios**:
 
-1. **Given** the user previously logged in successfully and closed the app, **When** they reopen the app, **Then** the system checks local storage for valid tokens, retrieves user information using those tokens, and navigates directly to the dashboard if authentication is successful
+1. **Given** the user previously logged in successfully and closed the app, **When** they reopen the app, **Then** the system displays a loading indicator, checks local storage for tokens, assumes they are valid, retrieves user information using those tokens, and navigates directly to the dashboard if the API call succeeds
 
-2. **Given** stored tokens exist in local storage, **When** the tokens are invalid or expired and the app starts, **Then** the system clears the invalid tokens and displays the login screen instead of the dashboard
+2. **Given** stored tokens exist and the app starts, **When** the user information retrieval API call fails due to invalid/expired tokens, **Then** the system clears the tokens from storage and displays the login screen instead of the dashboard
 
 3. **Given** no authentication data exists in local storage, **When** the app starts, **Then** the system displays the login screen immediately
+
+4. **Given** the user is authenticated and actively using the app, **When** the access token expires (detected via API error response), **Then** the system clears authentication state, removes tokens from storage, and redirects to the login screen
 
 ---
 
@@ -70,6 +82,7 @@ A clinic staff member closes the app during their work shift and later reopens i
 - What happens if the user profile fetch succeeds but returns incomplete data (e.g., missing role)?
 - How does the system handle rapid multiple login attempts?
 - What happens when the user rotates the device or the app goes to background during authentication?
+- What happens when an API call fails due to expired access token while the user is actively using the app?
 
 ## Requirements *(mandatory)*
 
@@ -91,9 +104,11 @@ A clinic staff member closes the app during their work shift and later reopens i
 
 - **FR-008**: Login screen MUST display a loading indicator on the login button during authentication attempts
 
+- **FR-023**: Login form MUST allow submission regardless of input field values (no client-side validation required) — all validation is performed by the backend API
+
 - **FR-009**: On successful login, the system MUST: store tokens in authentication state, retrieve user profile information using the access token, save user data to persistent storage, and navigate to Dashboard screen
 
-- **FR-010**: On failed login, the system MUST display an alert with the error message and reset loading state
+- **FR-010**: On failed login, the system MUST display a generic "Login failed" error message regardless of failure type (invalid credentials, network error, server error) and reset loading state
 
 - **FR-011**: Dashboard screen MUST display a welcome message at the top showing the authenticated user's name and role (e.g., "Welcome, Dr. Sarah Johnson (admin)")
 
@@ -109,9 +124,13 @@ A clinic staff member closes the app during their work shift and later reopens i
 
 - **FR-017**: App initialization MUST check local persistent storage for existing authentication tokens when the app starts
 
-- **FR-018**: If valid tokens exist in persistent storage on app start, the system MUST automatically retrieve user information using those tokens and navigate to Dashboard
+- **FR-018**: If tokens exist in persistent storage on app start, the system MUST display a loading indicator while retrieving user information using those tokens, then navigate to Dashboard if successful
 
-- **FR-019**: If no valid tokens exist in persistent storage on app start, the system MUST display Login screen
+- **FR-019**: If no tokens exist in persistent storage on app start, the system MUST display Login screen (no loading indicator needed)
+
+- **FR-020**: When an access token expires during an active session (indicated by API response or validation failure), the system MUST clear all authentication state, remove tokens from persistent storage, and redirect the user to the Login screen (no automatic token refresh)
+
+- **FR-021**: If the user information retrieval on app start fails due to invalid/expired tokens, the system MUST treat this as an authentication failure, clear tokens from storage, and display the Login screen
 
 ### Key Entities *(include if feature involves data)*
 
