@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, SafeAreaView, FlatList, useColorScheme } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, FlatList, useColorScheme } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import tw from '../lib/tailwind';
 

@@ -1,9 +1,12 @@
 
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, useColorScheme } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, useColorScheme } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
 import tw from '../lib/tailwind';
+import { useAuth } from '../context/AuthContext';
+import UserProfileIcon from '../components/UserProfileIcon';
 
 const kpiData = [
   { title: 'Outstanding', value: '$12,450', trend: '+2.5%', trendColor: 'danger', icon: 'hourglass-top' },
@@ -15,7 +18,13 @@ const timeRanges = ['7D', '30D', '90D', '1Y'];
 
 const DashboardScreen = () => {
   const [selectedTimeRange, setSelectedTimeRange] = React.useState('30D');
+  const { user } = useAuth();
   const isDark = useColorScheme() === 'dark';
+
+  // Format user role for display
+  const formatRole = (role: string) => {
+    return role.replace('_', ' ');
+  };
 
   return (
     <SafeAreaView style={tw`flex-1 bg-background-light dark:bg-background-dark`}>
@@ -24,12 +33,18 @@ const DashboardScreen = () => {
           <Icon name="menu" size={24} color="#FFFFFF" />
         </TouchableOpacity>
         <Text style={tw`text-xl font-bold text-white`}>Dashboard</Text>
-        <TouchableOpacity style={tw`flex size-10 items-center justify-center rounded-full`}>
-          <Icon name="account-circle" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
+        <UserProfileIcon iconColor="#FFFFFF" />
       </View>
       <ScrollView>
         <View style={tw`p-4`}>
+          {/* Welcome message with user name and role */}
+          {user && (
+            <View style={tw`mb-4 pb-4 border-b border-border-light/50 dark:border-border-dark/50`}>
+              <Text style={tw`text-2xl font-bold text-text-light dark:text-text-dark`}>
+                Welcome, {user.name}
+              </Text>
+            </View>
+          )}
             <View style={tw`flex flex-col md:flex-row gap-4`}>
             {kpiData.map((item, index) => {
                 const iconColor = tw.color(item.trendColor as 'danger' | 'success');

@@ -1,0 +1,211 @@
+openapi: 3.0.3
+info:
+  title: Authentication API
+  description: Authentication endpoints for clinic billing mobile application
+  version: 1.0.0
+  contact:
+    name: Clinic Billing API Team
+
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Development server
+  - url: https://api.clinicbilling.com/api/v1
+    description: Production server (placeholder)
+
+tags:
+  - name: auth
+    description: Authentication operations
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: User login
+      description: Authenticate user with username and password, returns JWT tokens
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              username: "admin@clinic.com"
+              password: "admin123"
+      responses:
+        '200':
+          description: Successful authentication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              example:
+                access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                refresh_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                token_type: "Bearer"
+        '401':
+          description: Authentication failed - invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                detail: "Invalid credentials"
+        '422':
+          description: Validation error - missing or invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/me:
+    get:
+      tags:
+        - auth
+      summary: Get current user profile
+      description: Retrieve authenticated user's profile information using JWT token
+      operationId: getCurrentUser
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+              example:
+                id: 1
+                email: "admin@clinic.com"
+                name: "Dr. Sarah Johnson"
+                role: "admin"
+                created_at: "2025-01-01T00:00:00Z"
+        '401':
+          description: Unauthorized - invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                detail: "Invalid authentication credentials"
+        '403':
+          description: Forbidden - token valid but insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token in Authorization header (Bearer {token})
+
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          format: email
+          description: User email address or username
+          example: "admin@clinic.com"
+        password:
+          type: string
+          format: password
+          description: User password
+          example: "admin123"
+      additionalProperties: false
+
+    LoginResponse:
+      type: object
+      required:
+        - access_token
+        - refresh_token
+        - token_type
+      properties:
+        access_token:
+          type: string
+          description: JWT access token (short-lived)
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        refresh_token:
+          type: string
+          description: JWT refresh token (long-lived, not used for auto-refresh in this feature)
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        token_type:
+          type: string
+          description: Token type, typically "Bearer"
+          enum:
+            - Bearer
+          example: "Bearer"
+      additionalProperties: false
+
+    UserResponse:
+      type: object
+      required:
+        - id
+        - email
+        - name
+        - role
+        - created_at
+      properties:
+        id:
+          oneOf:
+            - type: string
+            - type: integer
+          description: Unique user identifier
+          example: 1
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: "admin@clinic.com"
+        name:
+          type: string
+          description: User display name
+          example: "Dr. Sarah Johnson"
+        role:
+          type: string
+          enum:
+            - admin
+            - doctor
+            - billing_staff
+            - receptionist
+          description: User role in the system
+          example: "admin"
+        created_at:
+          type: string
+          format: date-time
+          description: Account creation timestamp (ISO 8601)
+          example: "2025-01-01T00:00:00Z"
+      additionalProperties: false
+
+    ErrorResponse:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: string
+          description: Error message
+          example: "Invalid credentials"
+      additionalProperties: false
+

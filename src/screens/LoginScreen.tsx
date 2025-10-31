@@ -1,31 +1,36 @@
 
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Switch, ScrollView, useColorScheme, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Switch, ScrollView, useColorScheme, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import tw from '../lib/tailwind';
+import { useAuth } from '../context/AuthContext';
 
-type Props = { onLogin: () => void };
+type Props = { onLogin?: () => void };
 
 const LoginScreen: React.FC<Props> = ({ onLogin }) => {
   const [email, setEmail] = useState('admin@clinic.com');
   const [password, setPassword] = useState('admin123');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isBiometricEnabled, setIsBiometricEnabled] = useState(false);
+  const { login, loading } = useAuth();
   const isDark = useColorScheme() === 'dark';
-  const handleLoginPress = () => {
+
+  const handleLoginPress = async () => {
     const trimmedEmail = email.trim();
     const trimmedPassword = password.trim();
-    if (!trimmedEmail || !trimmedPassword) {
-      Alert.alert('Missing credentials', 'Please enter your email and password.');
-      return;
+    
+    // No client-side validation per spec (FR-023) - submit immediately
+    // Backend will handle all validation
+    
+    try {
+      await login(trimmedEmail, trimmedPassword);
+      // Login successful - navigation handled by App.tsx based on isAuthenticated
+      onLogin?.();
+    } catch (error) {
+      // Generic error message per spec (FR-010)
+      Alert.alert('Login Failed', 'Login failed. Please try again.');
     }
-    // basic email shape check; can be replaced with stronger validation
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-      Alert.alert('Invalid email', 'Please enter a valid email address.');
-      return;
-    }
-    onLogin();
   };
 
 
@@ -93,10 +98,15 @@ const LoginScreen: React.FC<Props> = ({ onLogin }) => {
             />
           </View>
           <TouchableOpacity 
-            style={tw`flex w-full items-center justify-center rounded-lg bg-primary py-3.5 h-14 shadow-md`}
+            style={tw`flex w-full items-center justify-center rounded-lg bg-primary py-3.5 h-14 shadow-md ${loading ? 'opacity-50' : ''}`}
             onPress={handleLoginPress}
+            disabled={loading}
           >
-            <Text style={tw`text-base font-semibold text-white`}>Log In</Text>
+            {loading ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <Text style={tw`text-base font-semibold text-white`}>Log In</Text>
+            )}
           </TouchableOpacity>
           <View style={tw`pt-4 text-center`}>
             <Text style={tw`text-xs text-text-light/60 dark:text-text-dark/60`}>
