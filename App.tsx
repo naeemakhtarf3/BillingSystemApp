@@ -3,10 +3,11 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { StatusBar, useColorScheme } from 'react-native';
+import { StatusBar, useColorScheme, View, ActivityIndicator } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
+import { AuthProvider, useAuth } from './src/context/AuthContext';
 import LoginScreen from './src/screens/LoginScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
 import InvoicesScreen from './src/screens/InvoicesScreen';
@@ -51,8 +52,8 @@ function MainTabs() {
   );
 }
 
-const App = () => {
-  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+function AppNavigator() {
+  const { isAuthenticated, loading } = useAuth();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
 
@@ -61,27 +62,40 @@ const App = () => {
     (tw as any).setColorScheme?.(colorScheme ?? 'light');
   }, [colorScheme]);
 
-  const LoginScreenWithCallback = () => (
-    <LoginScreen onLogin={() => setIsLoggedIn(true)} />
-  );
+  // Show loading indicator during session restoration
+  if (loading && !isAuthenticated) {
+    return (
+      <View style={tw`flex-1 items-center justify-center bg-background-light dark:bg-background-dark`}>
+        <ActivityIndicator size="large" color="#4A90E2" />
+      </View>
+    );
+  }
 
   return (
+    <NavigationContainer>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+      <Stack.Navigator id={undefined} screenOptions={{ headerShown: false }}>
+        {isAuthenticated ? (
+          <Stack.Group>
+            <Stack.Screen name="Main" component={MainTabs} />
+            <Stack.Screen name="Payment" component={PaymentScreen} />
+          </Stack.Group>
+        ) : (
+          <Stack.Group>
+            <Stack.Screen name="Auth" component={LoginScreen} />
+          </Stack.Group>
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+const App = () => {
+  return (
     <SafeAreaProvider>
-      <NavigationContainer>
-        <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-        <Stack.Navigator id={undefined} screenOptions={{ headerShown: false }}>
-          {isLoggedIn ? (
-            <Stack.Group>
-              <Stack.Screen name="Main" component={MainTabs} />
-              <Stack.Screen name="Payment" component={PaymentScreen} />
-            </Stack.Group>
-          ) : (
-            <Stack.Group>
-              <Stack.Screen name="Auth" component={LoginScreenWithCallback} />
-            </Stack.Group>
-          )}
-        </Stack.Navigator>
-      </NavigationContainer>
+      <AuthProvider>
+        <AppNavigator />
+      </AuthProvider>
     </SafeAreaProvider>
   );
 };

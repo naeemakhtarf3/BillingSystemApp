@@ -17,10 +17,10 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create directory structure: src/context/, src/api/, src/components/, src/types/ (if not exists)
-- [ ] T002 Verify AsyncStorage dependency is installed: @react-native-community/async-storage
-- [ ] T003 [P] Verify React Navigation dependencies are installed: @react-navigation/native, @react-navigation/native-stack
-- [ ] T004 [P] Verify react-native-vector-icons is installed for icons
+- [x] T001 Create directory structure: src/context/, src/api/, src/components/, src/types/ (if not exists)
+- [x] T002 Verify AsyncStorage dependency is installed: @react-native-community/async-storage
+- [x] T003 [P] Verify React Navigation dependencies are installed: @react-navigation/native, @react-navigation/native-stack
+- [x] T004 [P] Verify react-native-vector-icons is installed for icons
 
 ---
 
@@ -30,9 +30,9 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 [P] Create TypeScript type definitions in src/types/auth.ts (User, UserRole, AuthTokens, AuthState, AuthContextValue, LoginRequest, LoginResponse, UserResponse)
-- [ ] T006 [P] Create API service structure in src/api/authApi.ts with placeholder functions (login and fetchUser)
-- [ ] T007 Create AuthContext provider structure in src/context/AuthContext.tsx with initial state management (user, tokens, isAuthenticated, loading state)
+- [x] T005 [P] Create TypeScript type definitions in src/types/auth.ts (User, UserRole, AuthTokens, AuthState, AuthContextValue, LoginRequest, LoginResponse, UserResponse)
+- [x] T006 [P] Create API service structure in src/api/authApi.ts with placeholder functions (login and fetchUser)
+- [x] T007 Create AuthContext provider structure in src/context/AuthContext.tsx with initial state management (user, tokens, isAuthenticated, loading state)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -46,17 +46,17 @@
 
 ### Implementation for User Story 1
 
-- [ ] T008 [US1] Implement login function in src/api/authApi.ts that sends POST request to http://localhost:8000/api/v1/auth/login with username and password, returns AuthTokens
-- [ ] T009 [US1] Implement fetchUser function in src/api/authApi.ts that sends GET request to http://localhost:8000/api/v1/auth/me with Bearer token in Authorization header, returns User object
-- [ ] T010 [US1] Add error handling in src/api/authApi.ts that catches all errors (network, API, parsing) and throws generic "Login failed" error message
-- [ ] T011 [US1] Implement login method in src/context/AuthContext.tsx that calls authApi.login, sets loading state, stores tokens in state, calls fetchUser, stores user in state, updates isAuthenticated flag
-- [ ] T012 [US1] Add AsyncStorage persistence in src/context/AuthContext.tsx login method to store tokens under key @auth:tokens and user under key @auth:user
-- [ ] T013 [US1] Update LoginScreen in src/screens/LoginScreen.tsx to add username and password input fields with default values (admin@clinic.com / admin123)
-- [ ] T014 [US1] Implement handleLogin function in src/screens/LoginScreen.tsx that calls authContext.login, displays loading indicator on button during call, handles success by allowing navigation, handles error by showing Alert with "Login failed" message
-- [ ] T015 [US1] Add loading state UI in src/screens/LoginScreen.tsx that displays loading indicator on login button when authentication is in progress
-- [ ] T016 [US1] Update App.tsx to wrap app with AuthProvider from src/context/AuthContext.tsx
-- [ ] T017 [US1] Implement navigation protection in App.tsx that conditionally renders LoginScreen if not authenticated, or MainTabs (Dashboard) if authenticated
-- [ ] T018 [US1] Update DashboardScreen in src/screens/DashboardScreen.tsx to display welcome message at top showing user name and role from authContext (format: "Welcome, {name} ({role})")
+- [x] T008 [US1] Implement login function in src/api/authApi.ts that sends POST request to http://localhost:8000/api/v1/auth/login with username and password, returns AuthTokens
+- [x] T009 [US1] Implement fetchUser function in src/api/authApi.ts that sends GET request to http://localhost:8000/api/v1/auth/me with Bearer token in Authorization header, returns User object
+- [x] T010 [US1] Add error handling in src/api/authApi.ts that catches all errors (network, API, parsing) and throws generic "Login failed" error message
+- [x] T011 [US1] Implement login method in src/context/AuthContext.tsx that calls authApi.login, sets loading state, stores tokens in state, calls fetchUser, stores user in state, updates isAuthenticated flag
+- [x] T012 [US1] Add AsyncStorage persistence in src/context/AuthContext.tsx login method to store tokens under key @auth:tokens and user under key @auth:user
+- [x] T013 [US1] Update LoginScreen in src/screens/LoginScreen.tsx to add username and password input fields with default values (admin@clinic.com / admin123)
+- [x] T014 [US1] Implement handleLogin function in src/screens/LoginScreen.tsx that calls authContext.login, displays loading indicator on button during call, handles success by allowing navigation, handles error by showing Alert with "Login failed" message
+- [x] T015 [US1] Add loading state UI in src/screens/LoginScreen.tsx that displays loading indicator on login button when authentication is in progress
+- [x] T016 [US1] Update App.tsx to wrap app with AuthProvider from src/context/AuthContext.tsx
+- [x] T017 [US1] Implement navigation protection in App.tsx that conditionally renders LoginScreen if not authenticated, or MainTabs (Dashboard) if authenticated
+- [x] T018 [US1] Update DashboardScreen in src/screens/DashboardScreen.tsx to display welcome message at top showing user name and role from authContext (format: "Welcome, {name} ({role})")
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently - user can log in and see dashboard with their information
 
@@ -70,12 +70,12 @@
 
 ### Implementation for User Story 2
 
-- [ ] T019 [US2] Create UserProfileIcon component in src/components/UserProfileIcon.tsx that renders person icon from react-native-vector-icons
-- [ ] T020 [US2] Add onPress handler in src/components/UserProfileIcon.tsx that displays modal/popover with user name, user role, and logout button
-- [ ] T021 [US2] Implement logout functionality in src/components/UserProfileIcon.tsx that calls authContext.logout when logout button is tapped
-- [ ] T022 [US2] Implement logout method in src/context/AuthContext.tsx that clears user and tokens from state, removes @auth:tokens and @auth:user from AsyncStorage, sets isAuthenticated to false
-- [ ] T023 [US2] Add dismiss functionality in src/components/UserProfileIcon.tsx modal that closes modal when user taps outside or dismisses it
-- [ ] T024 [US2] Add UserProfileIcon to DashboardScreen in src/screens/DashboardScreen.tsx in top-right corner, positioned as tappable TouchableOpacity
+- [x] T019 [US2] Create UserProfileIcon component in src/components/UserProfileIcon.tsx that renders person icon from react-native-vector-icons
+- [x] T020 [US2] Add onPress handler in src/components/UserProfileIcon.tsx that displays modal/popover with user name, user role, and logout button
+- [x] T021 [US2] Implement logout functionality in src/components/UserProfileIcon.tsx that calls authContext.logout when logout button is tapped
+- [x] T022 [US2] Implement logout method in src/context/AuthContext.tsx that clears user and tokens from state, removes @auth:tokens and @auth:user from AsyncStorage, sets isAuthenticated to false
+- [x] T023 [US2] Add dismiss functionality in src/components/UserProfileIcon.tsx modal that closes modal when user taps outside or dismisses it
+- [x] T024 [US2] Add UserProfileIcon to DashboardScreen in src/screens/DashboardScreen.tsx in top-right corner, positioned as tappable TouchableOpacity
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently - user can log in, view profile, and log out
 
