@@ -3,6 +3,8 @@
 Auto-generated from all feature plans. Last updated: 2025-10-31
 
 ## Active Technologies
+- TypeScript 5.8.3 (strict mode enabled) + React Native 0.82.1, React 19.1.1, twrnc 4.10.1 (Tailwind CSS), React Native AsyncStorage 2.2.0 (002-invoice-financial-metrics)
+- AsyncStorage (local caching for offline support), Backend PostgreSQL (via FastAPI REST API) (002-invoice-financial-metrics)
 
 - TypeScript (strict mode) / JavaScript ES6+ + React Native 0.82.1, React 19.1.1, @react-navigation/native 7.1.19, @react-navigation/native-stack 7.6.1, @react-native-community/async-storage (for AsyncStorage), react-native-vector-icons 10.3.0, twrnc 4.10.1 (001-implement-auth)
 
@@ -22,6 +24,7 @@ npm test; npm run lint
 TypeScript (strict mode) / JavaScript ES6+: Follow standard conventions
 
 ## Recent Changes
+- 002-invoice-financial-metrics: Added TypeScript 5.8.3 (strict mode enabled) + React Native 0.82.1, React 19.1.1, twrnc 4.10.1 (Tailwind CSS), React Native AsyncStorage 2.2.0
 
 - 001-implement-auth: Added TypeScript (strict mode) / JavaScript ES6+ + React Native 0.82.1, React 19.1.1, @react-navigation/native 7.1.19, @react-navigation/native-stack 7.6.1, @react-native-community/async-storage (for AsyncStorage), react-native-vector-icons 10.3.0, twrnc 4.10.1
 
