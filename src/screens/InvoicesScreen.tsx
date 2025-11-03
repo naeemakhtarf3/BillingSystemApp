@@ -1,30 +1,91 @@
 
-import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, FlatList, useColorScheme } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, FlatList, useColorScheme, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types';
 import tw from '../lib/tailwind';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth } from '../context/AuthContext';
+import { fetchInvoices } from '../api/invoiceApi';
+import { Invoice } from '../types/invoice';
+import { loadInvoiceCache, saveInvoiceCache } from '../utils/invoiceCache';
 
 const filters = ['All', 'Paid', 'Pending', 'Overdue'];
 
 // FIX: Define a strict type for invoice statuses to ensure type safety.
 type InvoiceStatus = 'Paid' | 'Pending' | 'Overdue';
 
-const invoiceData: {
+// Display invoice data structure
+interface DisplayInvoice {
     id: string;
     number: string;
     amount: string;
     patientId: string;
     dueDate: string;
     status: InvoiceStatus;
-}[] = [
-    { id: '1', number: '#INV-00123', amount: '$250.00', patientId: 'P-45678', dueDate: '25 Dec 2023', status: 'Paid' },
-    { id: '2', number: '#INV-00122', amount: '$150.00', patientId: 'P-45679', dueDate: '15 Dec 2023', status: 'Overdue' },
-    { id: '3', number: '#INV-00121', amount: '$475.50', patientId: 'P-45680', dueDate: '10 Jan 2024', status: 'Pending' },
-];
+}
+
+// Map API status to display status
+const mapApiStatusToDisplay = (status: string, dueDate?: string): InvoiceStatus => {
+    const now = new Date();
+    const due = dueDate ? new Date(dueDate) : null;
+    
+    if (status === 'paid') {
+        return 'Paid';
+    }
+    
+    // Check if overdue (unpaid/pending and past due date)
+    if ((status === 'unpaid' || status === 'pending') && due && due < now) {
+        return 'Overdue';
+    }
+    
+    if (status === 'pending') {
+        return 'Pending';
+    }
+    
+    // Default for unpaid (if not overdue)
+    return 'Pending';
+};
+
+// Format date from ISO string to readable format
+const formatDate = (dateString?: string): string => {
+    if (!dateString) return 'N/A';
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { 
+            day: 'numeric', 
+            month: 'short', 
+            year: 'numeric' 
+        });
+    } catch {
+        return 'Invalid Date';
+    }
+};
+
+// Format amount from cents to dollars
+const formatAmount = (cents: number): string => {
+    const dollars = cents / 100;
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(dollars);
+};
+
+// Convert API invoice to display format
+const convertInvoiceToDisplay = (invoice: Invoice): DisplayInvoice => {
+    return {
+        id: invoice.id.toString(),
+        number: `#${invoice.invoice_number}`,
+        amount: formatAmount(invoice.total_amount_cents),
+        patientId: `P-${invoice.patient_id}`,
+        dueDate: formatDate(invoice.due_date),
+        status: mapApiStatusToDisplay(invoice.status, invoice.due_date),
+    };
+};
 
 // FIX: Use the `InvoiceStatus` type to ensure the `statusStyles` record covers all possible statuses.
 const statusStyles: Record<InvoiceStatus, { bg: string, text: string }> = {
@@ -33,7 +94,7 @@ const statusStyles: Record<InvoiceStatus, { bg: string, text: string }> = {
     Pending: { bg: 'bg-amber-100 dark:bg-amber-900/50', text: 'text-amber-800 dark:text-amber-300' },
 };
 
-type InvoiceCardProps = typeof invoiceData[0];
+type InvoiceCardProps = DisplayInvoice;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;
 
 const InvoiceCard: React.FC<InvoiceCardProps> = ({ number, amount, patientId, dueDate, status }) => {
@@ -65,10 +126,71 @@ const InvoiceCard: React.FC<InvoiceCardProps> = ({ number, amount, patientId, du
 }
 
 const InvoicesScreen = () => {
-    const [activeFilter, setActiveFilter] = React.useState('All');
+    const [activeFilter, setActiveFilter] = useState('All');
+    const [invoices, setInvoices] = useState<DisplayInvoice[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const { tokens } = useAuth();
     const isDark = useColorScheme() === 'dark';
     const iconColor = isDark ? tw.color('text-dark') : tw.color('text-light');
     const mutedIconColor = isDark ? tw.color('border-dark') : tw.color('border-light');
+
+    useEffect(() => {
+        loadInvoices();
+    }, [tokens]);
+
+    const loadInvoices = async (isRefresh = false) => {
+        if (!tokens?.access_token) {
+            setIsLoading(false);
+            return;
+        }
+
+        if (isRefresh) {
+            setIsRefreshing(true);
+        } else {
+            setIsLoading(true);
+        }
+        setError(null);
+
+        try {
+            // Try to load from cache first for instant display (skip on refresh)
+            if (!isRefresh) {
+                const cachedInvoices = await loadInvoiceCache();
+                if (cachedInvoices) {
+                    const displayInvoices = cachedInvoices.map(convertInvoiceToDisplay);
+                    setInvoices(displayInvoices);
+                }
+            }
+
+            // Fetch fresh data
+            const apiInvoices = await fetchInvoices(tokens.access_token);
+            await saveInvoiceCache(apiInvoices);
+            const displayInvoices = apiInvoices.map(convertInvoiceToDisplay);
+            setInvoices(displayInvoices);
+        } catch (err) {
+            console.error('Error loading invoices:', err);
+            
+            // Try to use cache if fetch failed
+            const cachedInvoices = await loadInvoiceCache();
+            if (cachedInvoices) {
+                const displayInvoices = cachedInvoices.map(convertInvoiceToDisplay);
+                setInvoices(displayInvoices);
+            } else {
+                setError('Unable to load invoices');
+                setInvoices([]);
+            }
+        } finally {
+            setIsLoading(false);
+            setIsRefreshing(false);
+        }
+    };
+
+    // Filter invoices based on active filter
+    const filteredInvoices = invoices.filter(invoice => {
+        if (activeFilter === 'All') return true;
+        return invoice.status === activeFilter;
+    });
 
     return (
         <SafeAreaView style={tw`flex-1 bg-background-light dark:bg-background-dark`}>
@@ -102,13 +224,34 @@ const InvoicesScreen = () => {
                                 <Icon name="arrow-drop-down" size={24} color={mutedIconColor} />
                             </TouchableOpacity>
                         </View>
+                        {isLoading && (
+                            <View style={tw`items-center justify-center py-8`}>
+                                <ActivityIndicator size="large" color={tw.color('primary')} />
+                                <Text style={tw`mt-4 text-text-light/70 dark:text-text-dark/70`}>Loading invoices...</Text>
+                            </View>
+                        )}
+                        {error && !isLoading && (
+                            <View style={tw`mx-4 mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 p-4`}>
+                                <Text style={tw`text-red-800 dark:text-red-300`}>{error}</Text>
+                            </View>
+                        )}
+                        {!isLoading && !error && filteredInvoices.length === 0 && (
+                            <View style={tw`mx-4 mb-4 items-center justify-center py-8`}>
+                                <Icon name="inbox" size={48} color={mutedIconColor} />
+                                <Text style={tw`mt-4 text-base text-text-light/70 dark:text-text-dark/70`}>
+                                    No invoices found
+                                </Text>
+                            </View>
+                        )}
                     </>
                 }
-                data={invoiceData}
+                data={filteredInvoices}
                 renderItem={({ item }) => <InvoiceCard {...item} />}
                 keyExtractor={item => item.id}
                 contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}
                 ItemSeparatorComponent={() => <View style={tw`h-4`} />}
+                refreshing={isRefreshing}
+                onRefresh={() => loadInvoices(true)}
             />
             <TouchableOpacity style={tw`absolute bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary shadow-lg`}>
                 <Icon name="add" size={30} color="#FFFFFF" />
