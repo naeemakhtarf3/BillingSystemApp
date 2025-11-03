@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, useColorScheme } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -7,24 +7,102 @@ import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
 import tw from '../lib/tailwind';
 import { useAuth } from '../context/AuthContext';
 import UserProfileIcon from '../components/UserProfileIcon';
-
-const kpiData = [
-  { title: 'Outstanding', value: '$12,450', trend: '+2.5%', trendColor: 'danger', icon: 'hourglass-top' },
-  { title: 'Paid (Last 30 Days)', value: '$89,320', trend: '+15.1%', trendColor: 'success', icon: 'task-alt' },
-  { title: 'Total Revenue', value: '$542,800', trend: '+8.2%', trendColor: 'success', icon: 'trending-up' },
-];
+import { fetchInvoices } from '../api/invoiceApi';
+import { calculateFinancialMetrics, formatFinancialMetrics } from '../utils/financialMetrics';
+import { saveInvoiceCache, loadInvoiceCache } from '../utils/invoiceCache';
+import { Invoice, FinancialMetricsDisplay } from '../types/invoice';
 
 const timeRanges = ['7D', '30D', '90D', '1Y'];
 
 const DashboardScreen = () => {
-  const [selectedTimeRange, setSelectedTimeRange] = React.useState('30D');
-  const { user } = useAuth();
+  const [selectedTimeRange, setSelectedTimeRange] = useState('30D');
+  const [metrics, setMetrics] = useState<FinancialMetricsDisplay>({
+    outstandingRevenue: '$0.00',
+    paidRevenue: '$0.00',
+    totalRevenue: '$0.00',
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { user, tokens } = useAuth();
   const isDark = useColorScheme() === 'dark';
 
   // Format user role for display
   const formatRole = (role: string) => {
     return role.replace('_', ' ');
   };
+
+  useEffect(() => {
+    loadInvoiceData();
+  }, [tokens]);
+
+  const loadInvoiceData = async () => {
+    if (!tokens?.access_token) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Try to load from cache first for instant display
+      const cachedInvoices = await loadInvoiceCache();
+      if (cachedInvoices) {
+        updateMetrics(cachedInvoices);
+      }
+
+      // Fetch fresh data
+      const invoices = await fetchInvoices(tokens.access_token);
+      await saveInvoiceCache(invoices);
+      updateMetrics(invoices);
+    } catch (err) {
+      console.error('Error loading invoices:', err);
+      
+      // Try to use cache if fetch failed
+      const cachedInvoices = await loadInvoiceCache();
+      if (cachedInvoices) {
+        updateMetrics(cachedInvoices);
+      } else {
+        setError('Unable to load financial data');
+        // Set zero values as fallback
+        setMetrics({
+          outstandingRevenue: '$0.00',
+          paidRevenue: '$0.00',
+          totalRevenue: '$0.00',
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateMetrics = (invoices: Invoice[]) => {
+    const calculated = calculateFinancialMetrics(invoices);
+    const formatted = formatFinancialMetrics(calculated);
+    setMetrics(formatted);
+  };
+
+  // Update kpiData to use real metrics
+  const kpiData = [
+    { 
+      title: 'Outstanding', 
+      value: metrics.outstandingRevenue, 
+      trend: '+2.5%', // TODO: Calculate actual trend
+      trendColor: 'danger' as const, 
+      icon: 'hourglass-top' 
+    },
+    { 
+      title: 'Paid (Last 30 Days)', 
+      value: metrics.paidRevenue, 
+      trend: '+15.1%', // TODO: Calculate actual trend
+      trendColor: 'success' as const, 
+      icon: 'task-alt' 
+    },
+    { 
+      title: 'Total Revenue', 
+      value: metrics.totalRevenue, 
+      trend: '+8.2%', // TODO: Calculate actual trend
+      trendColor: 'success' as const, 
+      icon: 'trending-up' 
+    },
+  ];
 
   return (
     <SafeAreaView style={tw`flex-1 bg-background-light dark:bg-background-dark`}>

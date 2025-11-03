@@ -24,9 +24,9 @@
 
 **Purpose**: Project initialization and basic structure verification
 
-- [ ] T001 Verify existing project structure matches plan.md requirements
-- [ ] T002 Verify AsyncStorage dependency is installed in package.json
-- [ ] T003 [P] Verify TypeScript configuration supports strict mode
+- [x] T001 Verify existing project structure matches plan.md requirements
+- [x] T002 Verify AsyncStorage dependency is installed in package.json
+- [x] T003 [P] Verify TypeScript configuration supports strict mode
 
 ---
 
@@ -36,8 +36,8 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 [P] Create Invoice type definitions in src/types/invoice.ts (Invoice, FinancialMetrics, FinancialMetricsDisplay interfaces)
-- [ ] T005 [P] Create invoiceApi.ts service structure in src/api/invoiceApi.ts (platform-specific base URL, fetchInvoices function skeleton)
+- [x] T004 [P] Create Invoice type definitions in src/types/invoice.ts (Invoice, FinancialMetrics, FinancialMetricsDisplay interfaces)
+- [x] T005 [P] Create invoiceApi.ts service structure in src/api/invoiceApi.ts (platform-specific base URL, fetchInvoices function skeleton)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -51,15 +51,15 @@
 
 ### Implementation for User Story 1
 
-- [ ] T006 [US1] Implement fetchInvoices function in src/api/invoiceApi.ts (complete API call with JWT authentication, error handling, platform-specific URL)
-- [ ] T007 [P] [US1] Create calculateFinancialMetrics function in src/utils/financialMetrics.ts (filter invalid invoices, sum by status for Outstanding/Paid/Total)
-- [ ] T008 [P] [US1] Create formatCurrency function in src/utils/financialMetrics.ts (convert cents to dollars, format as $X,XXX.XX)
-- [ ] T009 [US1] Create formatFinancialMetrics function in src/utils/financialMetrics.ts (convert FinancialMetrics to FinancialMetricsDisplay)
-- [ ] T010 [US1] Update DashboardScreen.tsx to add useState hooks for metrics, loading, and error states
-- [ ] T011 [US1] Update DashboardScreen.tsx to add useEffect hook that calls fetchInvoices on mount
-- [ ] T012 [US1] Update DashboardScreen.tsx to calculate and format metrics from fetched invoices
-- [ ] T013 [US1] Update DashboardScreen.tsx to replace hardcoded kpiData values with calculated metrics
-- [ ] T014 [US1] Update DashboardScreen.tsx imports (add useAuth, fetchInvoices, calculateFinancialMetrics, formatFinancialMetrics, Invoice, FinancialMetricsDisplay)
+- [x] T006 [US1] Implement fetchInvoices function in src/api/invoiceApi.ts (complete API call with JWT authentication, error handling, platform-specific URL)
+- [x] T007 [P] [US1] Create calculateFinancialMetrics function in src/utils/financialMetrics.ts (filter invalid invoices, sum by status for Outstanding/Paid/Total)
+- [x] T008 [P] [US1] Create formatCurrency function in src/utils/financialMetrics.ts (convert cents to dollars, format as $X,XXX.XX)
+- [x] T009 [US1] Create formatFinancialMetrics function in src/utils/financialMetrics.ts (convert FinancialMetrics to FinancialMetricsDisplay)
+- [x] T010 [US1] Update DashboardScreen.tsx to add useState hooks for metrics, loading, and error states
+- [x] T011 [US1] Update DashboardScreen.tsx to add useEffect hook that calls fetchInvoices on mount
+- [x] T012 [US1] Update DashboardScreen.tsx to calculate and format metrics from fetched invoices
+- [x] T013 [US1] Update DashboardScreen.tsx to replace hardcoded kpiData values with calculated metrics
+- [x] T014 [US1] Update DashboardScreen.tsx imports (add useAuth, fetchInvoices, calculateFinancialMetrics, formatFinancialMetrics, Invoice, FinancialMetricsDisplay)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently - dashboard displays real financial metrics from API
 
@@ -73,15 +73,15 @@
 
 ### Implementation for User Story 2
 
-- [ ] T015 [P] [US2] Create saveInvoiceCache function in src/utils/invoiceCache.ts (save invoices to AsyncStorage with timestamp and TTL)
-- [ ] T016 [P] [US2] Create loadInvoiceCache function in src/utils/invoiceCache.ts (load cached invoices if not expired, return null if expired/missing)
-- [ ] T017 [US2] Update DashboardScreen.tsx loadInvoiceData to try loading from cache first for instant display
-- [ ] T018 [US2] Update DashboardScreen.tsx loadInvoiceData to save successful API responses to cache
-- [ ] T019 [US2] Update DashboardScreen.tsx loadInvoiceData to fallback to cache if API fetch fails
-- [ ] T020 [US2] Update DashboardScreen.tsx to handle API errors gracefully (set error state, show fallback $0.00 values if no cache)
-- [ ] T021 [US2] Update DashboardScreen.tsx to handle malformed JSON responses (try/catch around response.json())
-- [ ] T022 [US2] Update DashboardScreen.tsx to handle null/undefined invoice fields (filter invalid invoices in calculateFinancialMetrics)
-- [ ] T023 [US2] Update DashboardScreen.tsx imports (add saveInvoiceCache, loadInvoiceCache)
+- [x] T015 [P] [US2] Create saveInvoiceCache function in src/utils/invoiceCache.ts (save invoices to AsyncStorage with timestamp and TTL)
+- [x] T016 [P] [US2] Create loadInvoiceCache function in src/utils/invoiceCache.ts (load cached invoices if not expired, return null if expired/missing)
+- [x] T017 [US2] Update DashboardScreen.tsx loadInvoiceData to try loading from cache first for instant display
+- [x] T018 [US2] Update DashboardScreen.tsx loadInvoiceData to save successful API responses to cache
+- [x] T019 [US2] Update DashboardScreen.tsx loadInvoiceData to fallback to cache if API fetch fails
+- [x] T020 [US2] Update DashboardScreen.tsx to handle API errors gracefully (set error state, show fallback $0.00 values if no cache)
+- [x] T021 [US2] Update DashboardScreen.tsx to handle malformed JSON responses (try/catch around response.json())
+- [x] T022 [US2] Update DashboardScreen.tsx to handle null/undefined invoice fields (filter invalid invoices in calculateFinancialMetrics)
+- [x] T023 [US2] Update DashboardScreen.tsx imports (add saveInvoiceCache, loadInvoiceCache)
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently - dashboard handles errors gracefully and uses offline cache
 
@@ -95,11 +95,11 @@
 
 ### Implementation for User Story 3
 
-- [ ] T024 [US3] Verify formatCurrency function in src/utils/financialMetrics.ts uses Intl.NumberFormat with USD currency and 2 decimal places
-- [ ] T025 [US3] Update formatCurrency to handle negative values correctly (display negative currency amounts)
-- [ ] T026 [US3] Verify calculateFinancialMetrics maintains currency consistency (all calculations in cents, single currency assumed)
-- [ ] T027 [US3] Add validation in calculateFinancialMetrics to handle very large numbers (beyond JavaScript safe integer range) appropriately
-- [ ] T028 [US3] Update DashboardScreen.tsx to ensure all three metrics display formatted currency consistently ($X,XXX.XX pattern)
+- [x] T024 [US3] Verify formatCurrency function in src/utils/financialMetrics.ts uses Intl.NumberFormat with USD currency and 2 decimal places
+- [x] T025 [US3] Update formatCurrency to handle negative values correctly (display negative currency amounts)
+- [x] T026 [US3] Verify calculateFinancialMetrics maintains currency consistency (all calculations in cents, single currency assumed)
+- [x] T027 [US3] Add validation in calculateFinancialMetrics to handle very large numbers (beyond JavaScript safe integer range) appropriately
+- [x] T028 [US3] Update DashboardScreen.tsx to ensure all three metrics display formatted currency consistently ($X,XXX.XX pattern)
 
 **Checkpoint**: All user stories should now be independently functional - currency formatting is accurate and consistent
 
@@ -109,12 +109,12 @@
 
 **Purpose**: Improvements that affect multiple user stories and final validation
 
-- [ ] T029 [P] Verify all TypeScript types are strict (no any types, proper interfaces)
-- [ ] T030 [P] Verify error handling covers all edge cases from spec.md (empty array, null status, negative amounts, unknown statuses, large datasets, timeouts, malformed JSON, missing currency fields, duplicate invoices)
-- [ ] T031 Code cleanup and refactoring (ensure consistent code style with existing codebase)
-- [ ] T032 Verify performance: dashboard loads metrics within 3 seconds with up to 10,000 invoices
-- [ ] T033 Verify offline support: cached data displays when network is unavailable
-- [ ] T034 Run quickstart.md validation: verify implementation matches integration guide steps
+- [x] T029 [P] Verify all TypeScript types are strict (no any types, proper interfaces)
+- [x] T030 [P] Verify error handling covers all edge cases from spec.md (empty array, null status, negative amounts, unknown statuses, large datasets, timeouts, malformed JSON, missing currency fields, duplicate invoices)
+- [x] T031 Code cleanup and refactoring (ensure consistent code style with existing codebase)
+- [x] T032 Verify performance: dashboard loads metrics within 3 seconds with up to 10,000 invoices
+- [x] T033 Verify offline support: cached data displays when network is unavailable
+- [x] T034 Run quickstart.md validation: verify implementation matches integration guide steps
 
 ---
 
