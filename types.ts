@@ -1,15 +1,3 @@
-export type RootStackParamList = {
-  Auth: undefined;
-  Main: undefined;
-  Payment: undefined;
-};
-
-export type MainTabParamList = {
-  Dashboard: undefined;
-  Invoices: undefined;
-  AuditLog: undefined;
-};
-
 import type { NavigatorScreenParams } from '@react-navigation/native';
 
 export type AuthStackParamList = {

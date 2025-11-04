@@ -6,6 +6,8 @@ const tw = create({
     extend: {
       colors: {
         primary: '#2b6cb0',
+        danger: '#dc2626',
+        success: '#16a34a',
         'background-light': '#f7f9fc',
         'background-dark': '#0b0f14',
         'text-light': '#0b1b2b',

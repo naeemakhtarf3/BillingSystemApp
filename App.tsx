@@ -25,7 +25,6 @@ function MainTabs() {
   
   return (
     <Tab.Navigator
-      id={undefined}
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarIcon: ({ color, size }) => {
@@ -57,10 +56,8 @@ function AppNavigator() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
 
-  // Set the color scheme for twrnc
-  React.useEffect(() => {
-    (tw as any).setColorScheme?.(colorScheme ?? 'light');
-  }, [colorScheme]);
+  // Note: twrnc handles dark mode automatically via 'dark:' prefix in class names
+  // No need to manually set color scheme
 
   // Show loading indicator during session restoration
   if (loading && !isAuthenticated) {
@@ -74,7 +71,7 @@ function AppNavigator() {
   return (
     <NavigationContainer>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-      <Stack.Navigator id={undefined} screenOptions={{ headerShown: false }}>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
           <Stack.Group>
             <Stack.Screen name="Main" component={MainTabs} />
